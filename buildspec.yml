@@ -1,0 +1,18 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  build:
+    commands:
+      - ./gradlew -q clean packageLibs
+      - mv build/distributions/graviton2.zip build/distributions/graviton2-lib.zip
+      - ./gradlew -q build
+      - sam package
+        --template-file template.yml
+        --s3-bucket graviton2-tester-src
+        --output-template-file out.yml
+artifacts:
+  files:
+    - out.yml

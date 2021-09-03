@@ -1,0 +1,13 @@
+config:
+  target: "https://xxxxxx.amazonaws.com/default"
+  phases:
+    - duration: 60
+      arrivalRate: 180
+scenarios:
+  - flow:
+      - get:
+          url: "/garviton-combinations/40/6"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 200

@@ -1,0 +1,181 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: Graviton2 Lambda Tester
+
+Resources:
+  Graviton2RestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name : graviton2TesterApi
+
+  garvitonCombinations:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !GetAtt Graviton2RestApi.RootResourceId
+      PathPart: 'garviton-combinations'
+
+  garvitonCombinationsN:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !Ref garvitonCombinations
+      PathPart: '{n}'
+
+  garvitonCombinationsK:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !Ref garvitonCombinationsN
+      PathPart: '{k}'
+
+  Method:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId: !Ref garvitonCombinationsK
+      RestApiId: !Ref Graviton2RestApi
+      AuthorizationType: NONE
+      Integration:
+         Type: AWS_PROXY
+         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${gravitonTesterFunction.Arn}/invocations
+         IntegrationHttpMethod: POST
+
+  garvitonCombinationsX86:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !GetAtt Graviton2RestApi.RootResourceId
+      PathPart: 'garviton-x86-combinations'
+
+  garvitonCombinationsX86N:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !Ref garvitonCombinationsX86
+      PathPart: '{n}'
+
+  garvitonCombinationsX86K:
+    Type: 'AWS::ApiGateway::Resource'
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+      ParentId: !Ref garvitonCombinationsX86N
+      PathPart: '{k}'
+
+  MethodX86:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      HttpMethod: GET
+      ResourceId: !Ref garvitonCombinationsX86K
+      RestApiId: !Ref Graviton2RestApi
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${gravitonTesterFunctionX8664.Arn}/invocations
+        IntegrationHttpMethod: POST
+
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn:
+    - Method
+    - MethodX86
+    Properties:
+      RestApiId: !Ref Graviton2RestApi
+
+  ApiGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      DeploymentId: !Ref ApiGatewayDeployment
+      RestApiId: !Ref Graviton2RestApi
+      StageName: 'default'
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:*
+                Resource: arn:aws:logs:*:*:*
+
+  gravitonTesterFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: com.slalom.GravitonCombinatorialCalculator
+      Description: Function calculating combinations utilizing Graviton V2
+      Runtime: java11
+      PackageType: Zip
+      Code:
+        S3Bucket: graviton2-tester-src
+        S3Key: build/distributions/graviton2.zip
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Layers:
+        - !Ref gravitonLibraries
+      Architectures:
+        - arm64
+      TracingConfig:
+        Mode: Active
+      Tags:
+        - Key: 'CostProfile'
+          Value: 'GravitonTester-CF'
+
+  gravitonTesterFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt gravitonTesterFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Graviton2RestApi}/*/*
+
+  gravitonTesterFunctionX8664:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: com.slalom.GravitonCombinatorialCalculator
+      Description: Function calculating combinations
+      Runtime: java11
+      PackageType: Zip
+      Code:
+        S3Bucket: graviton2-tester-src
+        S3Key: build/distributions/graviton2.zip
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Layers:
+        - !Ref gravitonLibraries
+      TracingConfig:
+        Mode: Active
+      Tags:
+        - Key: 'CostProfile'
+          Value: 'GravitonTesterX8664-CF'
+
+  gravitonTesterFunctionX8664Permission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt gravitonTesterFunctionX8664.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${Graviton2RestApi}/*/*
+
+  gravitonLibraries:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: graviton2-tester-library
+      Description: Dependencies for the graviton-tester functions
+      Content: build/distributions/graviton2-lib.zip
+      CompatibleRuntimes:
+        - java11
+      CompatibleArchitectures:
+        - arm64
+        - x86_64
