@@ -9,21 +9,21 @@ Resources:
       Name : graviton2TesterApi
 
   garvitonCombinations:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !GetAtt Graviton2RestApi.RootResourceId
       PathPart: 'garviton-combinations'
 
   garvitonCombinationsN:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !Ref garvitonCombinations
       PathPart: '{n}'
 
   garvitonCombinationsK:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !Ref garvitonCombinationsN
@@ -42,21 +42,21 @@ Resources:
          IntegrationHttpMethod: POST
 
   garvitonCombinationsX86:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !GetAtt Graviton2RestApi.RootResourceId
       PathPart: 'garviton-x86-combinations'
 
   garvitonCombinationsX86N:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !Ref garvitonCombinationsX86
       PathPart: '{n}'
 
   garvitonCombinationsX86K:
-    Type: 'AWS::ApiGateway::Resource'
+    Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !Ref garvitonCombinationsX86N
@@ -119,9 +119,7 @@ Resources:
       Description: Function calculating combinations utilizing Graviton V2
       Runtime: java11
       PackageType: Zip
-      Code:
-        S3Bucket: graviton2-tester-src
-        S3Key: build/distributions/graviton2.zip
+      Code: build/distributions/graviton2.zip
       Role: !GetAtt LambdaExecutionRole.Arn
       Layers:
         - !Ref gravitonLibraries
@@ -148,9 +146,7 @@ Resources:
       Description: Function calculating combinations
       Runtime: java11
       PackageType: Zip
-      Code:
-        S3Bucket: graviton2-tester-src
-        S3Key: build/distributions/graviton2.zip
+      Code: build/distributions/graviton2.zip
       Role: !GetAtt LambdaExecutionRole.Arn
       Layers:
         - !Ref gravitonLibraries
