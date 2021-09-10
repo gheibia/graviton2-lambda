@@ -33,7 +33,7 @@ public class GravitonCombinatorialCalculator implements RequestHandler<APIGatewa
             return logErrorAndRespond(context, "valid input should look something like /d/d (set size - max 40, subset size)", ex);
         }
 
-        var fact = calculateCombinatorial(n, k);
+        var fact = calculateCombinations(n, k);
         return logAndRespond(context, fact);
     }
 
@@ -42,21 +42,22 @@ public class GravitonCombinatorialCalculator implements RequestHandler<APIGatewa
             throw new IllegalArgumentException("invalid input");
     }
 
-    private int calculateCombinatorial(int n, int k) {
-        double kFact = 1;
+    /// Calculates n!/(k! * (n-k)!)
+    private int calculateCombinations(int n, int k) {
+        double kFactorial = 1;
         for (double i = 1; i <= k; i++)
-            kFact *= i;
+            kFactorial *= i;
 
-        double nmkFact = 1;
+        double nMinuskFactorial = 1;
         for (double i = 1; i <= n - k; i++)
-            nmkFact *= i;
+            nMinuskFactorial *= i;
 
-        double nFact = nmkFact;
+        double nFactorial = nMinuskFactorial;
         for (double i = n - k + 1; i <= n; i++)
-            nFact *= i;
+            nFactorial *= i;
 
-        // the result is most definitely an integer (n!/(k! * (n-k)!))
-        return (int) (nFact / (kFact * nmkFact));
+        // the result is most definitely an integer
+        return (int) (nFactorial / (kFactorial * nMinuskFactorial));
     }
 
     private APIGatewayProxyResponseEvent logAndRespond(Context context, int comb) {

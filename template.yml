@@ -103,14 +103,22 @@ Resources:
               - sts:AssumeRole
       Path: "/"
       Policies:
-        - PolicyName: root
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - logs:*
-                Resource: arn:aws:logs:*:*:*
+      - PolicyName: root
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - logs:*
+            Resource: arn:aws:logs:*:*:*
+          - Effect: Allow
+            Action:
+            - xray:PutTraceSegments
+            - xray:PutTelemetryRecords
+            - xray:GetSamplingRules
+            - xray:GetSamplingTargets
+            - xray:GetSamplingStatisticSummaries
+            Resource: '*'
 
   gravitonTesterFunction:
     Type: AWS::Lambda::Function
@@ -130,6 +138,39 @@ Resources:
       Tags:
         - Key: 'CostProfile'
           Value: 'GravitonTester-CF'
+
+
+#  Using AWS::Serverless::Function it won't be necessary to create API resources and methods separately
+#  gravitonTesterFunction:
+#    Type: AWS::Serverless::Function
+#    Properties:
+#      Handler: com.slalom.GravitonCombinatorialCalculator
+#      Description: Function calculating combinations utilizing Graviton V2
+#      Runtime: java11
+#      CodeUri: build/distributions/graviton2.zip
+#      Timeout: 30
+#      Policies:
+#        - AWSXrayWriteOnlyAccess
+#        - AWSLambdaBasicExecutionRole
+#      Layers:
+#        - !Ref gravitonLibraries
+#      Architectures:
+#        - arm64
+#      Tracing: Active
+#      Events:
+#        ComputeCombinations:
+#          Type: Api
+#          Properties:
+#            Path: /garviton-combinations/{n}/{k}
+#            RequestParameters:
+#            - method.request.path.n:
+#                Required: true
+#                Caching: false
+#            - method.request.path.k:
+#                Required: true
+#                Caching: false
+#      Tags:
+#        'CostProfile': 'GravitonTester-CF'
 
   gravitonTesterFunctionPermission:
     Type: AWS::Lambda::Permission
