@@ -1,6 +1,6 @@
 # graviton2-lambda
 
-A simple Lambda function built with Java (Corretto 11) to be deployed twice: once using AWS's new Garviton CPU architecture and once, without.
+A simple Lambda function built with Java (Corretto 11) to be deployed twice: once using AWS's new Graviton CPU architecture and once, without.
 
 Each deployed function is behind a REST API method allowing us to test the performance and cost of each deployment.
 

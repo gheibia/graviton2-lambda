@@ -8,32 +8,32 @@ Resources:
     Properties:
       Name : graviton2TesterApi
 
-  garvitonCombinations:
+  gravitonCombinations:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !GetAtt Graviton2RestApi.RootResourceId
-      PathPart: 'garviton-combinations'
+      PathPart: 'graviton-combinations'
 
-  garvitonCombinationsN:
+  gravitonCombinationsN:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
-      ParentId: !Ref garvitonCombinations
+      ParentId: !Ref gravitonCombinations
       PathPart: '{n}'
 
-  garvitonCombinationsK:
+  gravitonCombinationsK:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
-      ParentId: !Ref garvitonCombinationsN
+      ParentId: !Ref gravitonCombinationsN
       PathPart: '{k}'
 
   Method:
     Type: AWS::ApiGateway::Method
     Properties:
       HttpMethod: GET
-      ResourceId: !Ref garvitonCombinationsK
+      ResourceId: !Ref gravitonCombinationsK
       RestApiId: !Ref Graviton2RestApi
       AuthorizationType: NONE
       Integration:
@@ -41,32 +41,32 @@ Resources:
          Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${gravitonTesterFunction.Arn}/invocations
          IntegrationHttpMethod: POST
 
-  garvitonCombinationsX86:
+  gravitonCombinationsX86:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
       ParentId: !GetAtt Graviton2RestApi.RootResourceId
-      PathPart: 'garviton-x86-combinations'
+      PathPart: 'graviton-x86-combinations'
 
-  garvitonCombinationsX86N:
+  gravitonCombinationsX86N:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
-      ParentId: !Ref garvitonCombinationsX86
+      ParentId: !Ref gravitonCombinationsX86
       PathPart: '{n}'
 
-  garvitonCombinationsX86K:
+  gravitonCombinationsX86K:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref Graviton2RestApi
-      ParentId: !Ref garvitonCombinationsX86N
+      ParentId: !Ref gravitonCombinationsX86N
       PathPart: '{k}'
 
   MethodX86:
     Type: AWS::ApiGateway::Method
     Properties:
       HttpMethod: GET
-      ResourceId: !Ref garvitonCombinationsX86K
+      ResourceId: !Ref gravitonCombinationsX86K
       RestApiId: !Ref Graviton2RestApi
       AuthorizationType: NONE
       Integration:
@@ -161,7 +161,7 @@ Resources:
 #        ComputeCombinations:
 #          Type: Api
 #          Properties:
-#            Path: /garviton-combinations/{n}/{k}
+#            Path: /graviton-combinations/{n}/{k}
 #            RequestParameters:
 #            - method.request.path.n:
 #                Required: true

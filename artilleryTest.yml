@@ -1,12 +1,12 @@
 config:
   target: "https://xxxxxx.amazonaws.com/default"
   phases:
-    - duration: 600
+    - duration: 900
       arrivalRate: 180
 scenarios:
   - flow:
       - get:
-          url: "/garviton-combinations/40/6"
+          url: "/graviton-x86-combinations/40/6"
           headers:
             Content-Type: "application/json"
           expect:
